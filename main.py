@@ -9,7 +9,7 @@ invitados = {}
 last_post_data = {}  
 detected_guests = set()  
 EXPIRATION_TIME = 5
-with open("invitados.csv", "r") as file:
+with open("invitados.csv", "r",encoding="utf-8") as file:
     reader = csv.reader(file)
     for line in reader:
         if len(line) == 5:
@@ -24,7 +24,7 @@ with open("invitados.csv", "r") as file:
             print(f"Error: La siguiente línea tiene un número incorrecto de campos: {line}")
 
 def find_invitado(id_hex):
-    return invitados.get(id_hex, None)
+    return invitados.get(id_hex.lower(), None)
 
 def remove_expired_invitados():
     while True:
@@ -34,10 +34,11 @@ def remove_expired_invitados():
         time.sleep(EXPIRATION_TIME)
 
 def update_invitado_status_in_csv(id_hex, new_status):
-    with open("invitados.csv", "r") as file:
+    id_hex = id_hex.lower()
+    with open("invitados.csv", "r",encoding="utf-8") as file:
         lines = file.readlines()
 
-    with open("invitados.csv", "w") as file:
+    with open("invitados.csv", "w",encoding="utf-8") as file:
         for line in lines:
             if line.startswith(id_hex):
                 line = ','.join(line.split(',')[:-1]) + f",{new_status}\n"
@@ -73,6 +74,7 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         client_ip = self.client_address[0]
         print(f"Anthena: {client_ip}")
+        
 
         decoded_data = post_data.decode('utf-8')
         json_data = json.loads(decoded_data)
@@ -96,6 +98,7 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def process_post_data(self, item):
         id_hex = item['data'].get('idHex', None)
+        print(f"ID: {id_hex}")
         if id_hex:
             invitado = find_invitado(id_hex)
             if invitado:
